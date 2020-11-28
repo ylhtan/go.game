@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke游戏开始</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+    </head>
+
+
+    <body>
+        <div style="width: 600px; height: 400px;">
+            <div>游戏开始界面 - 选择游戏模式</div>
+            <div><button id="b1" type="button" onclick="setLocalGameMode(1);">单机（1人）</button></div>
+            <div><button id="b2" type="button" onclick="setLocalGameMode(2);">单机（2人）</button></div>
+        </div>
+
+        <script type="text/javascript">
+            function setLocalGameMode(x) {
+                window.localStorage.setItem("LocalGameMode", x);
+                window.location.href ="/local/tanke";
+            }
+        </script>
+    </body>
+</html>

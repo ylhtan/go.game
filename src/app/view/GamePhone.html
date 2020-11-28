@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke游戏开始 - 手机版本</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+        <style type="text/css">
+            *{
+                -webkit-touch-callout: none; /系统默认菜单被禁用/
+                -webkit-user-select:none; /webkit浏览器/
+                -moz-user-select:none;/火狐/
+                -ms-user-select:none; /IE10/
+                user-select:none;
+            }
+            input{
+                -webkit-user-select: auto;
+            }
+            *{ -webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: transparent; /* For some Androids */ }
+        </style>
+    </head>
+
+
+    <body>
+    <div>游戏开始界面 - 选择游戏模式</div>
+        <div style="width: 300px; height: 400px; border: 1px solid #CCCCCC; text-align: center;">
+            <div style="width: 290px; height: 50px; border: 1px solid #FF0000;">
+                <div style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left;"></div>
+                <div id="up" style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left; background-color: #999999;"></div>
+                <div style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left;"></div>
+                <div id="bgPlay" style="width: 50px; height: 50px; border: 1px solid #00FF00;background-color: #999999; float: left;"></div>
+                <div id="bgStop" style="width: 50px; height: 50px; border: 1px solid #00FF00;background-color: #999999; float: left;"></div>
+            </div>
+            <div style="width: 290px; height: 50px; border: 1px solid #FF0000">
+                <div id="left" style="width: 50px; height: 50px; border: 1px solid #00FF00;float:left;background-color: #999999;"></div>
+                <div id="center" style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left;"></div>
+                <div id="right" style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left;background-color: #999999;"></div>
+                <div style="width: 50px; height: 50px; border: 1px solid #00FF00; float:left;"></div>
+                <div id="shot" style="width: 50px; height: 50px; border: 1px solid #00FF00;background-color: #999999; float:left;"></div>
+            </div>
+            <div style="width: 290px; height: 50px; border: 1px solid #FF0000">
+                <div style="width: 50px; height: 50px; border: 1px solid #00FF00;float:left;"></div>
+                <div id="down" style="width: 50px; height: 50px; border: 1px solid #00FF00;float:left;background-color: #999999;"></div>
+            </div>
+        </div>
+
+        <script>
+        function load (){
+            var up = document.getElementById("up");
+            up.addEventListener('touchstart',touch, false);
+            up.addEventListener('touchmove',touch, false);
+            up.addEventListener('touchend',touch, false);
+                 
+            function touch (event){
+                event.stopPropagation();
+                var event = event || window.event; 
+                switch(event.type){
+                    case "touchstart":
+                        console.log(event.touches[0].clientX+"-"+event.touches[0].clientY)
+                        break;
+                    case "touchend":
+                        console.log("Touch end (" + event.changedTouches[0].clientX + "," + event.changedTouches[0].clientY + ")");
+                        break;
+                    case "touchmove":
+                        console.log("<br>Touch moved (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")");
+                        break;
+                }
+                     
+            }
+        }
+        window.addEventListener('load',load, false);
+    </script>
+    </body>
+</html>

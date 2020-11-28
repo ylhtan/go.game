@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke 作战区</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+        <script type="text/javascript" src="/static/js/common/jquery-3.4.1.js"></script>
+        <script type="text/javascript" src="/static/js/web/tanke.js"></script>
+        <script type="text/javascript" src="/static/js/web/audio.js"></script>
+        <script type="text/javascript" src="/static/js/web/keyboard.js"></script>
+        <script type="text/javascript" src="/static/js/web/touch.js"></script>
+        <script type="text/javascript" src="/static/js/web/land.js"></script>
+        <script type="text/javascript" src="/static/js/web/text.js"></script>
+        <style type="text/css">
+            /*body {background-color: #000000;}*/
+            .touch1 {
+                width: 64px;
+                height: 64px;
+                float:left;
+                background-color: #FFEFD5;
+                border: 1px solid #999999;
+            }
+            .untouch1 {
+                width: 64px;
+                height: 64px;
+                float:left;
+                border: 1px solid #999999;
+            }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="can1" width="{{.canvasWidth}}px" height="{{.canvasHeight}}px" style="background-color: #000000;"></canvas>
+        <div id="p1" style="width:{{.canvasWidth}}px;height:100px;text-align:center;display:none"><a href="/game/room?uid={{.uid}}" style="color: #FF0000">再来一局</a></div>
+        
+        <div id="phone" style="width: 330px; height: 200px; border: 1px solid #CCCCCC; text-align: center; display: none;">
+            <div style="width: 330px; height: 64px;">
+                <div class="untouch1"></div>
+                <div id="up" class="touch1"></div>
+                <div class="untouch1"></div>
+                <div id="bgPlay" class="touch1"></div>
+                <div id="bgStop" class="touch1"></div>
+            </div>
+            <div style="width: 330px; height: 64px;">
+                <div id="left" class="touch1"></div>
+                <div class="untouch1"></div>
+                <div id="right" class="touch1"></div>
+                <div class="untouch1"></div>
+                <div id="shot" class="touch1"></div>
+            </div>
+            <div style="width: 330px; height: 64px;">
+                <div class="untouch1"></div>
+                <div id="down" class="touch1"></div>
+            </div>
+        </div>
+
+        
+        <script type="text/javascript">
+            //建立websocket连接
+            var ws = new WebSocket("ws://{{.ws}}/game/tankeSocket?uid={{.uid}}&roomid={{.roomid}}");  
+            //连接打开时触发 
+            ws.onopen = function(evt) {  
+                console.log("Connection open ...");  
+                // ws.send("ping");  
+            };  
+            //接收到消息时触发  
+            ws.onmessage = function(evt) {
+                var data = jQuery.parseJSON(evt.data);
+                grassArray = data.grassArray;
+                wallArray = data.wallArray;
+                steelArray = data.steelArray;
+                desertArray = data.desertArray;
+                riverArray = data.riverArray;
+                noEntryArea = data.noEntryArea;
+                heroTankArray = data.heroTank;
+                heroCount = heroTankArray.length;
+                enemyTankArray = data.enemyTank;
+                enemyCount = enemyTankArray.length;
+                roomStatus = data.roomStatus;
+                audioPlay = data.audioPlay;
+                drawPlay = data.drawPlay;
+                
+                flushMap();
+            };  
+            //连接关闭时触发  
+            ws.onclose = function(evt) {  
+                console.log("Connection closed.");  
+                window.clearInterval(int5);
+            };  
+
+            var canvas = document.getElementById("can1");
+            var canvasRect = canvas.getBoundingClientRect();
+            var ctx = canvas.getContext("2d");
+
+            //刷新地图
+            function flushMap() {
+                ctx.clearRect(0,0,canvasRect.width,canvasRect.height);
+                if (grassArray != null) {
+                    drawGrass();
+                }
+                if (wallArray != null) {
+                    drawWall();
+                }
+                if (steelArray != null) {
+                    drawSteel();
+                }
+                if (desertArray != null) {
+                    drawDesert();
+                }
+                if (riverArray != null) {
+                    drawRiver();
+                }
+                
+                for (i=0; i<heroCount; i++) {
+                    if (heroTankArray[i].Status == 1) {
+                        drawTank(heroTankArray[i]);
+                    }
+                }
+
+                for (i=0; i<enemyCount; i++) {
+                    if (enemyTankArray[i].Status == 1) {
+                        drawTank(enemyTankArray[i]);
+                    }
+                }
+
+                playDraw();
+                playAudio();
+
+                drawHeroBullet();
+                drawEnemyBullet();
+
+                if (roomStatus != 1) {
+                    setTimeout("gameOver(roomStatus)",1000);
+                }
+            }
+
+            //游戏结束
+            function gameOver(x) {
+                window.clearInterval(int5);
+                switch (x) {
+                    case 2:
+                    gameDoneText("恭喜！已过关");
+                    break;
+                    case 3:
+                    gameDoneText("GAME OVER");
+                    break;
+                    case 4:
+                    gameDoneText("所有玩家已离开");
+                    break;
+                    case 0:
+                    gameDoneText("游戏未开始");
+                    break;
+                    default:
+                    gameDoneText("未知状态");
+                    break;
+                }                
+                $("#p1").show();
+            }
+
+            //发送键盘按键
+            var int5 = window.setInterval("sendUserKey()", 50);
+
+            //手机控制区
+            var roomType = {{.roomType}}
+            if (roomType == "2") {
+                $("#phone").show();
+                window.addEventListener('load',load, false);
+            }
+            
+        </script>
+    </body>
+</html>

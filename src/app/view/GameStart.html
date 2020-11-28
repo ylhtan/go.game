@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke 游戏开始</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+    </head>
+
+
+    <body>
+        <div style="width: 600px; height: 400px;">
+            <div>游戏开始界面 - 选择游戏模式</div>
+            <div><button id="b1" type="button" onclick="setGameMode(1);">自己玩</button></div>
+            <div><button id="b2" type="button" onclick="setGameMode(2);">2人对战</button></div>
+            <div><button id="b3" type="button" onclick="setGameMode(3);">4人对战</button></div>
+        </div>
+
+        <script type="text/javascript">
+            function setGameMode(x) {
+                window.localStorage.setItem("GameMode", x);
+                window.location.href ="/game/tanke";
+            }
+        </script>
+    </body>
+</html>

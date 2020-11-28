@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+        <script type="text/javascript" src="/static/js/common/jquery-3.4.1.js"></script>
+    </head>
+
+
+    <body>
+        <div style="width: 600px; height: 400px;">
+            <div>房间列表</div>
+            {{range .roomList}}
+            <div>
+                <button id="b{{.}}" type="button" style="width:90px;height:30;" onclick="join({{.}});">房间{{.}}</button>
+                （当前<span id="UserCount{{.}}">0</span>人）
+                -> <span id="roomStatus{{.}}">未开始</span>
+                <button id="start{{.}}" type="button" onclick="startGame({{.}});" style="display: none">开始</button>
+                <button id="enter{{.}}" type="button" onclick="enterGame({{.}});" style="display: none">进入</button>
+            </div>
+            {{end}}
+
+        </div>
+
+        <script type="text/javascript">
+
+            //获取参数
+            function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                    var str = url.substr(1);
+                    strs = str.split("&");
+                    for(var i = 0; i < strs.length; i ++) {
+                        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+                    }
+                }
+                return theRequest;
+            }
+
+            //获取用户id
+            var Request = new Object();
+            Request = GetRequest();
+            var uid;
+            uid = Request['uid'];
+
+            //建立websocket连接
+            var ws = new WebSocket("ws://{{.ws}}/game/roomSocket?uid="+uid);  
+            //连接打开时触发 
+            ws.onopen = function(evt) {  
+                console.log("Connection open ...");  
+                // ws.send("ping");  
+            };  
+            //接收到消息时触发  
+            ws.onmessage = function(evt) {
+                var data = jQuery.parseJSON(evt.data);
+                // console.log("Received Message:"+data);  
+                for (i=0; i<data.length; i++) {
+                    roomId = i +1;
+                    buttonKey = "b"+roomId
+                    if (i<70) {
+                        $("#"+buttonKey).text("PC房间"+roomId);
+                    } else {
+                        $("#"+buttonKey).text("手机房间"+roomId);
+                    }
+                    
+                    userCountKey = "UserCount"+roomId;
+                    startKey = "#start"+roomId;
+                    enterKey = "#enter"+roomId;
+                    roomStatusKey = "roomStatus"+roomId;
+                    document.getElementById(userCountKey).innerHTML=data[i][0];
+                    switch (data[i][2]) {
+                        case 0:
+                        var txt = "未开始";
+                        $(enterKey).hide();
+                        // $(buttonKey).style.Color="#FF0000";
+                        document.getElementById(buttonKey).style.cssText = "width:90px;height:30;background-color:#E8FFC4;";
+                        break;
+                        case 1:
+                        var txt = "<span style='color:green'>进行中...</span>";
+                        $(enterKey).show();
+                        break;
+                        case 2:
+                        var txt = "GameWin";
+                        $(enterKey).hide();
+                        break;
+                        case 3:
+                        var txt = "GameOver";
+                        $(enterKey).hide();
+                        break;
+                        case 4:
+                        var txt = "所有人都已退出游戏";
+                        $(enterKey).hide();
+                        break;
+                        default:
+                        var txt = "状态未知";
+                        $(enterKey).hide();
+                    }
+                    document.getElementById(roomStatusKey).innerHTML=txt;
+                    if (data[i][1] == 1) {
+                        $(startKey).show();
+                    } else {
+                        $(startKey).hide();
+                    }
+                    //不在房间，不能进入
+                    if (data[i][1] == 0) {
+                        $(enterKey).hide();
+                    }
+                }
+            };  
+            //连接关闭时触发  
+            ws.onclose = function(evt) {  
+                console.log("Connection closed.");  
+            };  
+
+            function join(x) {
+                ws.send(x)
+            }
+
+            function startGame(x) {
+                var roomid = x;
+                x = parseInt(x);
+                if (x <= 70) {
+                    roomType = "1";
+                } else {
+                    roomType = "2";
+                }
+                $.get("/game/roomStart?uid="+uid+"&roomid="+roomid+"&roomtype="+roomType,function(data,status){
+                    console.log("Data: " + data + "\nStatus: " + status);
+                });
+            }
+
+            function enterGame(x) {
+                window.location.href ="/game/tanke?roomid="+x+"&uid="+uid;
+            }
+
+        </script>
+    </body>
+</html>

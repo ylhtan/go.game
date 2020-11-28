@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-us" id="extr-page">
+    <head>
+        <meta charset="utf-8">
+        <title>GameTanke</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+        <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+    </head>
+
+
+    <body>
+        <canvas id="can1" width="600px" height="480px" style="background-color: #000000;"></canvas>
+        <script type="text/javascript" src="/static/js/local/tanke.js"></script>
+        <script type="text/javascript" src="/static/js/local/audio.js"></script>
+        <script type="text/javascript" src="/static/js/local/keyboard.js"></script>
+        <script type="text/javascript" src="/static/js/local/land.js"></script>
+        <script type="text/javascript" src="/static/js/local/cross.js"></script>
+        <script type="text/javascript" src="/static/js/local/text.js"></script>
+        <script type="text/javascript">
+            var LocalGameMode = window.localStorage.getItem("LocalGameMode");
+
+            var canvas = document.getElementById("can1");
+            var canvasRect = canvas.getBoundingClientRect();
+            var ctx = canvas.getContext("2d");
+
+            tank1Color = new Array();
+            tank1Color[0] = "#708069";
+            tank1Color[1] = "#E3CF57";
+            tank1Color[2] = "#E3CF57";
+            var tank1 = new HeroClass(canvasRect.width-90,canvasRect.height-30,0,3,tank1Color);
+            // var tank1 = new HeroClass(0,0,2,3,tank1Color);
+
+            tank2Color = new Array();
+            tank2Color[0] = "#FF60AF";
+            tank2Color[1] = "#FFD9EC";
+            tank2Color[2] = "#FFD9EC";
+            var tank2 = new HeroClass(canvasRect.width-60,canvasRect.height-30,0,3,tank2Color);
+            if (LocalGameMode == 1) {
+                tank2.x = -100;
+                tank2.y = -100;
+                tank2.status = 0;
+            }
+
+            var enemyCount = 10;
+            enemyColor = new Array();
+            enemyColor[0] = "#808069";
+            enemyColor[1] = "#B0E0E6";
+            enemyColor[2] = "#B0E0E6";
+            enemyColor2 = new Array();
+            enemyColor2[0] = "#008B8B";
+            enemyColor2[1] = "#AFEEEE";
+            enemyColor2[2] = "#AFEEEE";
+            var enemyTankArray = new Array();
+            for (i=0; i<enemyCount; i++) {
+                if (i < (enemyCount-5)) {
+                    enemyTank = new EnemyClass(i*30,0,2,3,enemyColor);
+                } else {
+                    enemyTank = new EnemyClass(i*30,0,2,4,enemyColor2);
+                    enemyTank.type = 2;
+                }
+                enemyTankArray[i] = enemyTank;
+            }
+
+            //刷新地图
+            function flushMap() {
+                ctx.clearRect(0,0,canvasRect.width,canvasRect.height);
+                emptyNoEntryArea();
+                drawGrass();
+                drawWall();
+                drawSteel();
+                
+                checkPass();
+                checkFail();
+                
+                checkHeroTankPosition();
+                checkNoEntryArea();
+                drawTank(tank1);
+                drawTank(tank2);
+                drawHeroBullet();
+                for (i=0; i<enemyCount; i++) {
+                    if (enemyTankArray[i].status == 1) {
+                        drawTank(enemyTankArray[i]);
+                    }
+                }
+                drawEnemyBullet();
+            }
+
+            //检测是否还有剩余敌人
+            function checkPass() {
+                var pass = true;
+                for (i=0; i<enemyCount; i++) {
+                    if (enemyTankArray[i].status == 1) {
+                        pass = false;
+                    }
+                }
+                if (pass) {
+                    gameDone();
+                    setTimeout("gameNext()",1000);
+                }
+            }
+
+            //检测是否还有剩余玩家
+            function checkFail() {
+                if (tank1.status == 0 && tank2.status == 0) {
+                    gameDone();
+                    setTimeout("gameOver()",1000);
+                }
+            }
+
+            //本局结束（消灭所有敌人或者玩家都被打死）
+            function gameDone() {
+                window.clearInterval(int6);
+
+                window.clearInterval(int4);
+                window.clearInterval(int3);
+                window.clearInterval(int2);
+                window.clearInterval(int1);
+                bgStop();
+            }
+
+            //游戏结束
+            function gameOver() {
+                window.clearInterval(int5);
+                gameDoneText("GAME OVER");
+            }
+
+            //进入下一关
+            function gameNext() {
+                window.clearInterval(int5);
+                gameDoneText("恭喜！已过关");
+            }
+
+            //子弹相关计算
+            function bulletAll() {
+                heroBulletFly();
+                enemyBulletFly();
+                checkKillEnemy();
+                checkShotHero();
+            }
+            
+            var int1 = window.setInterval("flushMap()", 75);
+            var int2 = window.setInterval("enemyMove()", 50); //每100ms敌人坦克移动一次
+            var int3 = window.setInterval("enemyMoveDirect()", 4000); //每5秒更改敌人坦克移动方向
+            var int4 = window.setInterval("bulletAll()", 20); //子弹相关计算
+            var int5 = window.setInterval("userControl()", 50); //检查键盘按键（玩家移动频率）
+            var int6 = window.setInterval("enemyShot()", 2000); //敌人坦克发子弹
+            
+        </script>
+    </body>
+</html>
