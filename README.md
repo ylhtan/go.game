@@ -1,7 +1,8 @@
 
 源码介绍：
 
-本源码是一个golang实现的游戏demo
+一个golang实现的坦克大战demo，包含本地版和网络版
+
 
 
 操作步骤：
@@ -13,6 +14,7 @@
 3、启动 go run src/app/main/main.go（需要将go.game配置到GOLANG环境）
 
 4、启动后输入http://{domain}/game/start即可体验
+
 
 
 版权说明：
